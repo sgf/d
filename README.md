@@ -1,2 +1,2 @@
 # d
-graphic library
+pure C# graphic library
