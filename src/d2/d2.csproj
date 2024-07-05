@@ -1,0 +1,95 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<Compile Remove="Color.cs" />
+		<Compile Remove="ColorF.cs" />
+		<Compile Remove="Colors.cs" />
+		<Compile Remove="Converters\ColorTypeConverter.cs" />
+		<Compile Remove="Converters\PointFTypeConverter.cs" />
+		<Compile Remove="Converters\PointTypeConverter.cs" />
+		<Compile Remove="Converters\RectFTypeConverter.cs" />
+		<Compile Remove="Converters\RectTypeConverter.cs" />
+		<Compile Remove="Converters\SizeFTypeConverter.cs" />
+		<Compile Remove="Converters\SizeTypeConverter.cs" />
+		<Compile Remove="ICanvas.cs" />
+		<Compile Remove="IRender.cs" />
+		<Compile Remove="pixellib\bak\ikitwin.bak%28跨平台的窗口管理,暂时用不上%29.cs" />
+		<Compile Remove="pixellib\ikitwin.bak%28跨平台的窗口管理,暂时用不上%29.cs" />
+		<Compile Remove="Point.cs" />
+		<Compile Remove="PointF.cs" />
+		<Compile Remove="raylib.cs" />
+		<Compile Remove="Rect.cs" />
+		<Compile Remove="RectF.cs" />
+		<Compile Remove="rshapes.cs" />
+		<Compile Remove="Size.cs" />
+		<Compile Remove="SizeF.cs" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Remove="pixellib\iblit386.c" />
+		<None Remove="pixellib\iblit386.h" />
+		<None Remove="pixellib\ibmbits.c" />
+		<None Remove="pixellib\ibmbits.h" />
+		<None Remove="pixellib\ibmcols.c" />
+		<None Remove="pixellib\ibmcols.h" />
+		<None Remove="pixellib\ibmdata.c" />
+		<None Remove="pixellib\ibmdata.h" />
+		<None Remove="pixellib\ibmfont.c" />
+		<None Remove="pixellib\ibmfont.h" />
+		<None Remove="pixellib\ibmsse2.c" />
+		<None Remove="pixellib\ibmsse2.h" />
+		<None Remove="pixellib\ibmwink.h" />
+		<None Remove="pixellib\ikitwin.c" />
+		<None Remove="pixellib\ikitwin.h" />
+		<None Remove="pixellib\ipicture.c" />
+		<None Remove="pixellib\ipicture.h" />
+		<None Remove="pixellib\mswindx.c" />
+		<None Remove="pixellib\mswindx.h" />
+		<None Remove="pixellib\npixel.c" />
+		<None Remove="pixellib\npixel.h" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Folder Include="Converters\" />
+		<Folder Include="pixellib\bak\" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="FastGuid" Version="1.0.6" />
+		<PackageReference Include="FastIDs.TypeId" Version="1.0.0" />
+		<PackageReference Include="HPCsharp" Version="3.17.0" />
+		<PackageReference Include="Medo.Uuid7" Version="2.0.0" />
+		<PackageReference Include="NativeMemoryArray" Version="1.2.0" />
+		<PackageReference Include="NetUlid" Version="2.1.0" />
+		<PackageReference Include="NUlid" Version="1.7.2" />
+		<PackageReference Include="SimdLinq" Version="1.3.2" />
+		<PackageReference Include="Ulid" Version="1.3.3" />
+		<PackageReference Include="UUIDNext" Version="3.0.0" />
+		<PackageReference Include="ZString" Version="2.6.0" />
+		<PackageReference Include="FastBitmapLib" Version="2.1.0" />
+		<PackageReference Include="Hazdryx.FastBitmap" Version="1.3.2" />
+		<PackageReference Include="Speedy-Bitmap" Version="1.0.0" />
+		<PackageReference Include="Tedd.WriteableBitmap" Version="1.0.3" />
+		<PackageReference Include="WriteableBitmapEx" Version="1.6.8" />
+		<PackageReference Include="Amplifier.NET" Version="1.1.0" />
+		<PackageReference Include="ColorHelper" Version="1.8.1" />
+		<PackageReference Include="Colourful" Version="3.2.0" />
+		<PackageReference Include="ComputeSharp" Version="3.0.0-preview2" />
+		<PackageReference Include="Concentus" Version="2.2.1" />
+		<PackageReference Include="ILGPU.Algorithms" Version="1.5.1" />
+		<PackageReference Include="ImTools" Version="4.0.0" />
+		<PackageReference Include="BitsKit" Version="1.1.0" />
+		<PackageReference Include="StructureOfArraysGenerator" Version="1.1.0">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+	</ItemGroup>
+
+</Project>
