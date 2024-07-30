@@ -1,38 +1,91 @@
 ﻿namespace d2;
 
-public readonly unsafe partial struct ColorF
+// sk_color4f_t
+[StructLayout(LayoutKind.Explicit, Pack = 4, Size = 16)]
+public readonly unsafe partial struct ColorF : IEquatable<ColorF>
 {
     private const float EPSILON = 0.001f;
 
-    public static readonly ColorF Empty;
-
-    public ColorF(float red, float green, float blue)
+    [InlineArray(4)]
+    public struct ColorFloat4Array
     {
-        fR = red;
-        fG = green;
-        fB = blue;
-        fA = 1f;
+        private float _element0;
+        //public float this[int i]
+        //{
+        //    get => this[i];
+        //    set => this[i] = value;
+        //}
+    }
+    [FieldOffset(0)]
+    private readonly ColorFloat4Array colorChans;
+    [FieldOffset(0)]
+    private readonly Single red;
+    [FieldOffset(1)]
+    private readonly Single green;
+    [FieldOffset(2)]
+    private readonly Single blue;
+    [FieldOffset(3)]
+    private readonly Single alpha;
+
+    //public readonly byte Alpha => colorChans[3];// (byte)((color >> 24) & 0xff);
+    //public readonly byte Red => colorChans[2];// (byte)((color >> 16) & 0xff);
+    //public readonly byte Green => colorChans[1]; //(byte)((color >> 8) & 0xff);
+    //public readonly byte Blue => colorChans[0]; //(byte)((color) & 0xff);
+
+    public readonly Single R => red;
+    public readonly Single G => green;
+    public readonly Single B => blue;
+    public readonly Single A => alpha;
+
+    public readonly bool Equals(ColorF obj) =>
+        R == obj.R && G == obj.G && B == obj.B && A == obj.A;
+
+    public readonly override bool Equals(object obj) =>
+        obj is ColorF f && Equals(f);
+
+    public static bool operator ==(ColorF left, ColorF right) =>
+        left.Equals(right);
+
+    public static bool operator !=(ColorF left, ColorF right) =>
+        !left.Equals(right);
+
+    public readonly override int GetHashCode()
+    {
+        var hash = new HashCode();
+        hash.Add(R);
+        hash.Add(G);
+        hash.Add(B);
+        hash.Add(A);
+        return hash.ToHashCode();
     }
 
-    public ColorF(float red, float green, float blue, float alpha)
+    public ColorF(double r, double g, double b, double a = 1)
     {
-        fR = red;
-        fG = green;
-        fB = blue;
-        fA = alpha;
+        red = (float)r;
+        green = (float)g;
+        blue = (float)b;
+        alpha = (float)a;
     }
 
-    public readonly ColorF WithRed(float red) =>
-        new (red, fG, fB, fA);
+    public ColorF(float r, float g, float b, float a = 1f)
+    {
+        red = r;
+        green = g;
+        blue = b;
+        alpha = a;
+    }
 
-    public readonly ColorF WithGreen(float green) =>
-        new (fR, green, fB, fA);
+    public readonly ColorF WithRed(float r) =>
+        new(r, G, B, A);
 
-    public readonly ColorF WithBlue(float blue) =>
-        new (fR, fG, blue, fA);
+    public readonly ColorF WithGreen(float g) =>
+        new(R, g, B, A);
 
-    public readonly ColorF WithAlpha(float alpha) =>
-        new (fR, fG, fB, alpha);
+    public readonly ColorF WithBlue(float b) =>
+        new(R, G, b, A);
+
+    public readonly ColorF WithAlpha(float a) =>
+        new(R, G, B, a);
 
     public readonly float Hue
     {
@@ -45,7 +98,7 @@ public readonly unsafe partial struct ColorF
 
     public readonly ColorF Clamp()
     {
-        return new ColorF(Clamp(fR), Clamp(fG), Clamp(fB), Clamp(fA));
+        return new ColorF(Clamp(R), Clamp(G), Clamp(B), Clamp(A));
 
         static float Clamp(float v)
         {
@@ -117,64 +170,39 @@ public readonly unsafe partial struct ColorF
         var b = v;
 
         // HSL from 0 to 1
-        if (Math.Abs(s) > EPSILON)
-        {
-            h = h * 6f;
-            if (Math.Abs(h - 6f) < EPSILON)
-                h = 0f; // H must be < 1
+        if (Math.Abs(s) <= EPSILON)
+            return new(r, g, b, a);
 
-            var hInt = (int)h;
-            var v1 = v * (1f - s);
-            var v2 = v * (1f - s * (h - hInt));
-            var v3 = v * (1f - s * (1f - (h - hInt)));
+        h = h * 6f;
+        if (Math.Abs(h - 6f) < EPSILON)
+            h = 0f; // H must be < 1
 
-            if (hInt == 0)
-            {
-                r = v;
-                g = v3;
-                b = v1;
-            }
-            else if (hInt == 1)
-            {
-                r = v2;
-                g = v;
-                b = v1;
-            }
-            else if (hInt == 2)
-            {
-                r = v1;
-                g = v;
-                b = v3;
-            }
-            else if (hInt == 3)
-            {
-                r = v1;
-                g = v2;
-                b = v;
-            }
-            else if (hInt == 4)
-            {
-                r = v3;
-                g = v1;
-                b = v;
-            }
-            else
-            {
-                r = v;
-                g = v1;
-                b = v2;
-            }
-        }
+        var hInt = (int)h;
+        var v1 = v * (1f - s);
+        var v2 = v * (1f - s * (h - hInt));
+        var v3 = v * (1f - s * (1f - (h - hInt)));
 
-        return new ColorF(r, g, b, a);
+        if (hInt == 0)
+            return new(r: v, g: v3, b: v1, a);
+        else if (hInt == 1)
+            return new(r: v2, g: v, b: v1, a);
+        else if (hInt == 2)
+            return new(r: v1, g: v, b: v3, a);
+        else if (hInt == 3)
+            return new(r: v1, g: v2, b: v, a);
+        else if (hInt == 4)
+            return new(r: v3, g: v1, b: v, a);
+        else
+            return new(r: v, g: v1, b: v2, a);
+
     }
 
     public readonly void ToHsl(out float h, out float s, out float l)
     {
         // RGB from 0 to 1
-        var r = fR;
-        var g = fG;
-        var b = fB;
+        var r = R;
+        var g = G;
+        var b = B;
 
         var min = Math.Min(Math.Min(r, g), b); // min value of RGB
         var max = Math.Max(Math.Max(r, g), b); // max value of RGB
@@ -219,9 +247,9 @@ public readonly unsafe partial struct ColorF
     public readonly void ToHsv(out float h, out float s, out float v)
     {
         // RGB from 0 to 1
-        var r = fR;
-        var g = fG;
-        var b = fB;
+        var r = R;
+        var g = G;
+        var b = B;
 
         var min = Math.Min(Math.Min(r, g), b); // min value of RGB
         var max = Math.Max(Math.Max(r, g), b); // max value of RGB
@@ -260,16 +288,17 @@ public readonly unsafe partial struct ColorF
         v = v * 100f;
     }
 
-    public override readonly string ToString() =>
-        ((SKColor)this).ToString();
+    public override readonly string ToString() => ((Color)this).ToString();
 
-    public static implicit operator ColorF(SKColor color)
-    {
-        ColorF colorF;
-        SkiaApi.sk_color4f_from_color((uint)color, &colorF);
-        return colorF;
-    }
 
-    public static explicit operator SKColor(ColorF color) =>
-        SkiaApi.sk_color4f_to_color(&color);
+    public static ColorF FromRGBA(byte r, byte g, byte b, byte a = 255) => new Color(r, g, b, a).ToColorF();
+
+    public static implicit operator ColorF(Color color) => color.ToColorF(); //SkiaApi.sk_color4f_from_color((uint)color, &colorF);
+
+    public static explicit operator Color(ColorF color) => color.ToColor(); //SkiaApi.sk_color4f_to_color(&color);
+
+    public static ColorF FromColor(Color bgra) => bgra.ToColorF();
+
+    public Color ToColor() => new((byte)(R * 255).Clamp(0, 255), (byte)(G * 255).Clamp(0, 255), (byte)(B * 255).Clamp(0, 255), (byte)(A * 255).Clamp(0, 255));
+
 }

@@ -1,12 +1,45 @@
-﻿using System.Globalization;
+﻿using PixelFarm.VectorMath;
+using System.Globalization;
 
 namespace d2;
 
-public readonly struct Color : IEquatable<Color>
+[StructLayout(LayoutKind.Explicit, Pack = 1, Size = 4)]
+public unsafe readonly struct Color : IEquatable<Color>, IColor
 {
-    public static readonly Color Empty;
+    [InlineArray(4)]
+    public struct Color32bbpArray
+    {
+        private byte _element0;
+        //public byte this[int i]
+        //{
+        //    get => this[i];
+        //    set => this[i] = value;
+        //}
+    }
 
-    private readonly uint color;
+    public static readonly Color Transparent = Empty;
+    public static readonly Color Empty;
+    public uint UIntValue => color;
+    public readonly byte A => a;
+    public readonly byte R => r;
+    public readonly byte G => g;
+    public readonly byte B => b;
+
+    [FieldOffset(0)] private readonly uint color;
+    [FieldOffset(0)] public readonly byte a;
+    [FieldOffset(1)] public readonly byte r;
+    [FieldOffset(2)] public readonly byte g;
+    [FieldOffset(3)] public readonly byte b;
+    [FieldOffset(0)] private readonly Color32bbpArray colorChans;
+
+    //public readonly byte A => colorChans[3];// (byte)((color >> 24) & 0xff);
+    //public readonly byte R => colorChans[2];// (byte)((color >> 16) & 0xff);
+    //public readonly byte G => colorChans[1]; //(byte)((color >> 8) & 0xff);
+    //public readonly byte B => colorChans[0]; //(byte)((color) & 0xff);
+
+    public static implicit operator Color(uint color) => new(color);
+    public static implicit operator uint(Color color) => color.color;
+
 
     public Color(uint value) => color = value;
 
@@ -14,18 +47,14 @@ public readonly struct Color : IEquatable<Color>
 
     public Color(byte red, byte green, byte blue) => color = (0xff000000u | (uint)(red << 16) | (uint)(green << 8) | blue);
 
-    public readonly Color WithRed(byte red) => new Color(red, Green, Blue, Alpha);
+    public readonly Color WithRed(byte red) => new(red, G, B, A);
 
-    public readonly Color WithGreen(byte green) => new Color(Red, green, Blue, Alpha);
+    public readonly Color WithGreen(byte green) => new(R, green, B, A);
 
-    public readonly Color WithBlue(byte blue) => new Color(Red, Green, blue, Alpha);
+    public readonly Color WithBlue(byte blue) => new(R, G, blue, A);
 
-    public readonly Color WithAlpha(byte alpha) => new Color(Red, Green, Blue, alpha);
+    public readonly Color WithAlpha(byte alpha) => new(R, G, B, alpha);
 
-    public readonly byte Alpha => (byte)((color >> 24) & 0xff);
-    public readonly byte Red => (byte)((color >> 16) & 0xff);
-    public readonly byte Green => (byte)((color >> 8) & 0xff);
-    public readonly byte Blue => (byte)((color) & 0xff);
 
     public readonly float Hue
     {
@@ -41,9 +70,9 @@ public readonly struct Color : IEquatable<Color>
         var colorf = ColorF.FromHsl(h, s, l);
 
         // RGB results from 0 to 255
-        var r = colorf.Red * 255f;
-        var g = colorf.Green * 255f;
-        var b = colorf.Blue * 255f;
+        var r = colorf.R * 255f;
+        var g = colorf.G * 255f;
+        var b = colorf.B * 255f;
 
         return new Color((byte)r, (byte)g, (byte)b, a);
     }
@@ -53,9 +82,9 @@ public readonly struct Color : IEquatable<Color>
         var colorf = ColorF.FromHsv(h, s, v);
 
         // RGB results from 0 to 255
-        var r = colorf.Red * 255f;
-        var g = colorf.Green * 255f;
-        var b = colorf.Blue * 255f;
+        var r = colorf.R * 255f;
+        var g = colorf.G * 255f;
+        var b = colorf.B * 255f;
 
         return new Color((byte)r, (byte)g, (byte)b, a);
     }
@@ -63,9 +92,9 @@ public readonly struct Color : IEquatable<Color>
     public readonly void ToHsl(out float h, out float s, out float l)
     {
         // RGB from 0 to 255
-        var r = Red / 255f;
-        var g = Green / 255f;
-        var b = Blue / 255f;
+        var r = R / 255f;
+        var g = G / 255f;
+        var b = B / 255f;
 
         var colorf = new ColorF(r, g, b);
         colorf.ToHsl(out h, out s, out l);
@@ -74,37 +103,25 @@ public readonly struct Color : IEquatable<Color>
     public readonly void ToHsv(out float h, out float s, out float v)
     {
         // RGB from 0 to 255
-        var r = Red / 255f;
-        var g = Green / 255f;
-        var b = Blue / 255f;
+        var r = R / 255f;
+        var g = G / 255f;
+        var b = B / 255f;
 
         var colorf = new ColorF(r, g, b);
         colorf.ToHsv(out h, out s, out v);
     }
 
-    public override readonly string ToString() =>
-        $"#{Alpha:x2}{Red:x2}{Green:x2}{Blue:x2}";
+    public override readonly string ToString() => $"#{A:x2}{R:x2}{G:x2}{B:x2}";
 
-    public readonly bool Equals(Color obj) =>
-        obj.color == color;
+    public readonly bool Equals(Color obj) => obj.color == color;
 
-    public override readonly bool Equals(object other) =>
-        other is Color f && Equals(f);
+    public override readonly bool Equals(object other) => other is Color f && Equals(f);
 
-    public static bool operator ==(Color left, Color right) =>
-        left.Equals(right);
+    public static bool operator ==(Color left, Color right) => left.Equals(right);
 
-    public static bool operator !=(Color left, Color right) =>
-        !left.Equals(right);
+    public static bool operator !=(Color left, Color right) => !left.Equals(right);
 
-    public override readonly int GetHashCode() =>
-        color.GetHashCode();
-
-    public static implicit operator Color(uint color) =>
-        new Color(color);
-
-    public static explicit operator uint(Color color) =>
-        color.color;
+    public override readonly int GetHashCode() => color.GetHashCode();
 
     public static Color Parse(string hexString)
     {
@@ -122,7 +139,6 @@ public readonly struct Color : IEquatable<Color>
             return false;
         }
 
-#if NETCOREAPP3_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER
         // clean up string
         var hexSpan = hexString.AsSpan().Trim().TrimStart('#');
 
@@ -181,60 +197,22 @@ public readonly struct Color : IEquatable<Color>
             }
             return true;
         }
-#else
-			// clean up string
-			hexString = hexString.Trim ();
-			var startIndex = hexString[0] == '#' ? 1 : 0;
-
-			var len = hexString.Length - startIndex;
-			if (len == 3 || len == 4) {
-				byte a;
-				// parse [A]
-				if (len == 4) {
-					if (!byte.TryParse (string.Concat (new string (hexString[len - 4 + startIndex], 2)), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out a)) {
-						// error
-						color = SKColor.Empty;
-						return false;
-					}
-				} else {
-					a = 255;
-				}
-
-				// parse RGB
-				if (!byte.TryParse (new string (hexString[len - 3 + startIndex], 2), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var r) ||
-					!byte.TryParse (new string (hexString[len - 2 + startIndex], 2), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var g) ||
-					!byte.TryParse (new string (hexString[len - 1 + startIndex], 2), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var b)) {
-					// error
-					color = SKColor.Empty;
-					return false;
-				}
-
-				// success
-				color = new SKColor (r, g, b, a);
-				return true;
-			}
-
-			if (len == 6 || len == 8) {
-				// parse [AA]RRGGBB
-				if (!uint.TryParse (hexString.Substring (startIndex), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var number)) {
-					// error
-					color = SKColor.Empty;
-					return false;
-				}
-
-				// success
-				color = (SKColor)number;
-
-				// alpha was not provided, so use 255
-				if (len == 6) {
-					color = color.WithAlpha (255);
-				}
-				return true;
-			}
-#endif
-
-        // error
         color = Color.Empty;
         return false;
+    }
+    public Vector3 ToVector3()
+    {
+        return new Vector3(R / 255.0f, G / 255.0f, B / 255.0f);
+    }
+
+    public Vector4 ToVector4()
+    {
+        return new Vector4(R / 255.0f, G / 255.0f, B / 255.0f, A / 255.0f);
+    }
+
+    public ColorF ToColorF()
+    {
+        var v = this.ToVector4();
+        return new ColorF(v.x, v.y, v.z, v.w);
     }
 }
