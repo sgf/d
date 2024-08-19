@@ -10,12 +10,12 @@ namespace d2;
 [DebuggerDisplay ("X/Left:{Left}, Y/Top:{Top}, Width:{Width}, Height:{Height}, Right:{Right}, Bottom:{Bottom}")]
 //[TypeConverter (typeof (Converters.RectTypeConverter))]
 [StructLayout (LayoutKind.Sequential)]
-public unsafe partial struct RtF : IEquatable<RtF>
+public unsafe partial struct rectf : IEquatable<rectf>
 {
-    public static readonly RtF Empty;
+    public static readonly rectf Empty;
     //public static Rt Zero = new Rt ();
 
-    public RtF (float left, float top, float right, float bottom)
+    public rectf (float left, float top, float right, float bottom)
     {
         this.left = left;
         this.right = right;
@@ -23,18 +23,26 @@ public unsafe partial struct RtF : IEquatable<RtF>
         this.bottom = bottom;
     }
 
-    public RtF (PtF loc, SzF sz) : this (loc.X, loc.Y, loc.X + sz.Width, loc.Y + sz.Height)
+    public rectf(float left, float top, (float width, float height) widthHeight)
+    {
+        this.left = left;
+        this.right = left+widthHeight.width;
+        this.top = top;
+        this.bottom = top+ widthHeight.height;
+    }
+
+    public rectf (pointf loc, sizef sz) : this (loc.X, loc.Y, loc.X + sz.Width, loc.Y + sz.Height)
     {
 
     }
 
-    public static RtF FromXYWH (float x, float y, float width, float height)
-    => RtF.Create (x, y, width, height);
+    public static rectf FromXYWH (float x, float y, float width, float height)
+    => rectf.Create (x, y, width, height);
 
-    public readonly PtF Mid => Ctr;
+    public readonly pointf Mid => Ctr;
     public readonly float MidX => CtrX;
     public readonly float MidY => CtrY;
-    public readonly PtF Ctr => new (CtrX, CtrY);
+    public readonly pointf Ctr => new (CtrX, CtrY);
     public readonly float CtrX => left + (Width / 2f);
     public readonly float CtrY => top + (Height / 2f);
 
@@ -48,42 +56,42 @@ public unsafe partial struct RtF : IEquatable<RtF>
 
     public readonly bool IsEmpty => this == Empty;
 
-    public SzF Size {
-        readonly get => new SzF (Width, Height);
+    public sizef Size {
+        readonly get => new  (Width, Height);
         set {
             right = left + value.Width;
             bottom = top + value.Height;
         }
     }
 
-    public PtF Location {
-        readonly get => new PtF (left, top);
-        set => this = RtF.Create (value, Size);
+    public pointf Location {
+        readonly get => new pointf (left, top);
+        set => this = rectf.Create (value, Size);
     }
 
-    public readonly RtF Standardized {
+    public readonly rectf Standardized {
         get {
             if (left > right) {
                 if (top > bottom) {
-                    return new RtF (right, bottom, left, top);
+                    return new rectf (right, bottom, left, top);
                 } else {
-                    return new RtF (right, top, left, bottom);
+                    return new rectf (right, top, left, bottom);
                 }
             } else {
                 if (top > bottom) {
-                    return new RtF (left, bottom, right, top);
+                    return new rectf (left, bottom, right, top);
                 } else {
-                    return new RtF (left, top, right, bottom);
+                    return new rectf (left, top, right, bottom);
                 }
             }
         }
     }
 
-    public readonly RtF AspectFit (SzF size) => AspectResize (size, true);
+    public readonly rectf AspectFit (sizef size) => AspectResize (size, true);
 
-    public readonly RtF AspectFill (SzF size) => AspectResize (size, false);
+    public readonly rectf AspectFill (sizef size) => AspectResize (size, false);
 
-    private readonly RtF AspectResize (SzF size, bool fit)
+    private readonly rectf AspectResize (sizef size, bool fit)
     {
         if (size.Width == 0 || size.Height == 0 || Width == 0 || Height == 0)
             return Create (MidX, MidY, 0, 0);
@@ -107,16 +115,16 @@ public unsafe partial struct RtF : IEquatable<RtF>
         return Create (aspectLeft, aspectTop, aspectWidth, aspectHeight);
     }
 
-    public static RtF Inflate (RtF rect, float x, float y)
+    public static rectf Inflate (rectf rect, float x, float y)
     {
-        var r = new RtF (rect.left, rect.top, rect.right, rect.bottom);
+        var r = new rectf (rect.left, rect.top, rect.right, rect.bottom);
         r.Inflate (x, y);
         return r;
     }
 
     /// <summary> 膨胀,扩大 </summary>
     /// <param name="size"></param>
-    public void Inflate (SzF size) =>
+    public void Inflate (sizef size) =>
         Inflate (size.Width, size.Height);
 
     public void Inflate (float x, float y)
@@ -127,32 +135,32 @@ public unsafe partial struct RtF : IEquatable<RtF>
         bottom += y;
     }
 
-    public static RtF Intersect (RtF a, RtF b)
+    public static rectf Intersect (rectf a, rectf b)
     {
         if (!a.IntersectsWithInclusive (b)) {
             return Empty;
         }
-        return new RtF (
+        return new rectf (
             Math.Max (a.left, b.left),
             Math.Max (a.top, b.top),
             Math.Min (a.right, b.right),
             Math.Min (a.bottom, b.bottom));
     }
 
-    public void Intersect (RtF rect) =>
+    public void Intersect (rectf rect) =>
         this = Intersect (this, rect);
 
-    public static RtF Union (RtF a, RtF b) =>
-        new RtF (
+    public static rectf Union (rectf a, rectf b) =>
+        new rectf (
             Math.Min (a.left, b.left),
             Math.Min (a.top, b.top),
             Math.Max (a.right, b.right),
             Math.Max (a.bottom, b.bottom));
 
-    public void Union (RtF rect) =>
+    public void Union (rectf rect) =>
         this = Union (this, rect);
 
-    public static implicit operator RtF (RtInt r) =>
+    public static implicit operator rectf (recti r) =>
         new (r.Left, r.Top, r.Right, r.Bottom);
 
     //public static implicit operator RtI (Rt  r) =>
@@ -161,17 +169,17 @@ public unsafe partial struct RtF : IEquatable<RtF>
     public readonly bool Contains (float x, float y) =>
         (x >= left) && (x < right) && (y >= top) && (y < bottom);
 
-    public readonly bool Contains (PtF pt) =>
+    public readonly bool Contains (pointf pt) =>
         Contains (pt.X, pt.Y);
 
-    public readonly bool Contains (RtF rect) =>
+    public readonly bool Contains (rectf rect) =>
         (left <= rect.left) && (right >= rect.right) &&
         (top <= rect.top) && (bottom >= rect.bottom);
 
-    public readonly bool IntersectsWith (RtF rect) =>
+    public readonly bool IntersectsWith (rectf rect) =>
         (left < rect.right) && (right > rect.left) && (top < rect.bottom) && (bottom > rect.top);
 
-    public readonly bool IntersectsWithInclusive (RtF rect) =>
+    public readonly bool IntersectsWithInclusive (rectf rect) =>
         (left <= rect.right) && (right >= rect.left) && (top <= rect.bottom) && (bottom >= rect.top);
 
     public void Offset (float x, float y)
@@ -182,21 +190,21 @@ public unsafe partial struct RtF : IEquatable<RtF>
         bottom += y;
     }
 
-    public void Offset (PtF pos) => Offset (pos.X, pos.Y);
+    public void Offset (pointf pos) => Offset (pos.X, pos.Y);
 
     public readonly override string ToString () =>
         $"X/Left:{Left}, Y/Top:{Top}, Width:{Width}, Height:{Height}, Right:{Right}, Bottom:{Bottom}";
 
-    public static RtF Create (PtF location, SzF size) =>
+    public static rectf Create (pointf location, sizef size) =>
         Create (location.X, location.Y, size.Width, size.Height);
 
-    public static RtF Create (SzF size) =>
-        Create (PtF.Empty, size);
+    public static rectf Create (sizef size) =>
+        Create (pointf.Empty, size);
 
-    public static RtF Create (float width, float height) =>
-        new (PtF.Empty.X, PtF.Empty.Y, width, height);
+    public static rectf Create (float width, float height) =>
+        new (pointf.Empty.X, pointf.Empty.Y, width, height);
 
-    public static RtF Create (float x, float y, float width, float height) =>
+    public static rectf Create (float x, float y, float width, float height) =>
         new (x, y, x + width, y + height);
 
     private Single left;
@@ -223,23 +231,23 @@ public unsafe partial struct RtF : IEquatable<RtF>
         set => bottom = value;
     }
 
-    public readonly bool Equals (RtF obj) =>
+    public readonly bool Equals (rectf obj) =>
         left == obj.left && top == obj.top && right == obj.right && bottom == obj.bottom;
 
     public readonly override bool Equals (object obj)
     {
         if (ReferenceEquals (null, obj))
             return false;
-        return obj is RtF f && Equals (f);
+        return obj is rectf f && Equals (f);
     }
 
-    public static bool operator == (RtF left, RtF right) =>
+    public static bool operator == (rectf left, rectf right) =>
         left.Equals (right);//本质上是字节对比,因此可以优化为int64x2的直接对比,当然这还得增加 FieldOffset
 
     //public static bool operator == (Rt r1, Rt r2)
     //    => (r1.Location == r2.Location) && (r1.Size == r2.Size);
 
-    public static bool operator != (RtF left, RtF right) =>
+    public static bool operator != (rectf left, rectf right) =>
         !left.Equals (right);
 
     public readonly override int GetHashCode ()
@@ -265,7 +273,7 @@ public unsafe partial struct RtF : IEquatable<RtF>
     //}
 
     //取整
-    public RtF Round ()
+    public rectf Round ()
         => new ((float)Math.Round (X), (float)Math.Round (Y), (float)Math.Round (Width), (float)Math.Round (Height));
 
     /// <summary>
@@ -281,7 +289,7 @@ public unsafe partial struct RtF : IEquatable<RtF>
         bottom = this.bottom;
     }
 
-    public static bool TryParse (string value, out RtF rectangle)
+    public static bool TryParse (string value, out rectf rectangle)
     {
         if (!string.IsNullOrEmpty (value)) {
             string[] xywh = value.Split (',');

@@ -5,8 +5,3 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace d2;
-
-public interface IDrawable
-{
-    void Draw (ICanvas canvas, rectf dirtyRect);
-}

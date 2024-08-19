@@ -81,7 +81,7 @@ public partial interface IImg<TColor> : IEnumerable<TColor >, IDrawable, IDispos
     Task SaveAsync (Stream stream, ImgFmt format = ImgFmt.Png, float quality = 1);
     IImg ToPlatformImage ();
 
-    public SzF Size => new(this.Width, this.Height);
+    public sizef Size => new(this.Width, this.Height);
 }
 
 public enum CorFmt : int

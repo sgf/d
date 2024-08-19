@@ -7,13 +7,13 @@ using System.Numerics;
 namespace d2;
 
 [StructLayout (LayoutKind.Sequential)]
-public unsafe partial struct SzF : IEquatable<SzF>
+public unsafe partial struct sizef : IEquatable<sizef>
 {
     /// <summary> same as Zero </summary>
-    public static readonly SzF Empty = Zero;
-    public static readonly SzF Zero;
+    public static readonly sizef Empty = Zero;
+    public static readonly sizef Zero;
 
-    public SzF (float size = 0)
+    public sizef (float size = 0)
     {
 #if DEBUG
         if (float.IsNaN (size)) throw new ArgumentException ("NaN is not a valid value for size");
@@ -22,7 +22,7 @@ public unsafe partial struct SzF : IEquatable<SzF>
         h = size;
     }
 
-    public SzF (float width, float height)
+    public sizef (float width, float height)
     {
 #if DEBUG
         if (float.IsNaN (width)) throw new ArgumentException ("NaN is not a valid value for width");
@@ -32,7 +32,7 @@ public unsafe partial struct SzF : IEquatable<SzF>
         h = height;
     }
 
-    public SzF (PtF pt)
+    public sizef (pointf pt)
     {
 #if DEBUG
         if (float.IsNaN (pt.X)) throw new ArgumentException ("NaN is not a valid value for X");
@@ -42,7 +42,7 @@ public unsafe partial struct SzF : IEquatable<SzF>
         h = pt.Y;
     }
 
-    public SzF (Vector2 vector)
+    public sizef (Vector2 vector)
     {
 #if DEBUG
         if (float.IsNaN (vector.X)) throw new ArgumentException ("NaN is not a valid value for X");
@@ -55,9 +55,9 @@ public unsafe partial struct SzF : IEquatable<SzF>
     public readonly bool IsEmpty => IsZero;
     public readonly bool IsZero => this == Zero;
 
-    public readonly PtF ToPoint () => new (w, h);
+    public readonly pointf ToPoint () => new (w, h);
 
-    public readonly SzInt ToSizeI ()
+    public readonly sizei ToSizeI ()
     {
         int w, h;
         checked {
@@ -65,24 +65,24 @@ public unsafe partial struct SzF : IEquatable<SzF>
             h = (int)this.h;
         }
 
-        return new SzInt (w, h);
+        return new sizei (w, h);
     }
 
     public readonly override string ToString () => $"{{Width={w}, Height={h}}}";
 
-    public static SzF Add (SzF sz1, SzF sz2) => sz1 + sz2;
+    public static sizef Add (sizef sz1, sizef sz2) => sz1 + sz2;
 
-    public static SzF Subtract (SzF sz1, SzF sz2) => sz1 - sz2;
+    public static sizef Subtract (sizef sz1, sizef sz2) => sz1 - sz2;
 
-    public static SzF operator + (SzF sz1, SzF sz2) =>
+    public static sizef operator + (sizef sz1, sizef sz2) =>
         new (sz1.Width + sz2.Width, sz1.Height + sz2.Height);
 
-    public static SzF operator - (SzF sz1, SzF sz2) =>
+    public static sizef operator - (sizef sz1, sizef sz2) =>
         new (sz1.Width - sz2.Width, sz1.Height - sz2.Height);
 
-    public static explicit operator PtF (SzF size) =>
+    public static explicit operator pointf (sizef size) =>
         new (size.Width, size.Height);
-    public static implicit operator SzF (SzInt size) =>
+    public static implicit operator sizef (sizei size) =>
         new (size.Width, size.Height);
 
     private Single w;
@@ -97,16 +97,16 @@ public unsafe partial struct SzF : IEquatable<SzF>
         set => h = value;
     }
 
-    public readonly bool Equals (SzF obj) =>
+    public readonly bool Equals (sizef obj) =>
         w == obj.w && h == obj.h;
 
     public readonly override bool Equals (object obj) =>
-        obj is SzF f && Equals (f);
+        obj is sizef f && Equals (f);
 
-    public static bool operator == (SzF left, SzF right) =>
+    public static bool operator == (sizef left, sizef right) =>
         left.Equals (right);
 
-    public static bool operator != (SzF left, SzF right) =>
+    public static bool operator != (sizef left, sizef right) =>
         !left.Equals (right);
 
     public readonly override int GetHashCode ()
@@ -131,14 +131,14 @@ public unsafe partial struct SzF : IEquatable<SzF>
         height = Height;
     }
 
-    public static bool TryParse (string value, out SzF size)
+    public static bool TryParse (string value, out sizef size)
     {
         if (!string.IsNullOrEmpty (value)) {
             string[] wh = value.Split (',');
             if (wh.Length == 2
                 && float.TryParse (wh[0], NumberStyles.Number, CultureInfo.InvariantCulture, out var w)
                 && float.TryParse (wh[1], NumberStyles.Number, CultureInfo.InvariantCulture, out var h)) {
-                size = new SzF (w, h);
+                size = new sizef (w, h);
                 return true;
             }
         }

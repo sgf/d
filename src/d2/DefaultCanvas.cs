@@ -16,16 +16,17 @@ public class DefaultCanvas : ICanvas
     PixelFarm.Drawing.IPainter p;
     public ICanvas Clear(uint color)
     {
-        throw new NotImplementedException();
+        p.Clear(color);
+        return this;
     }
 
-    public ICanvas Clip(RtF rect)
+    public ICanvas Clip(rectf rect)
     {
         p.SetClipBox((int)rect.X, (int)rect.Y, (int)(rect.X + rect.Width), (int)(rect.Y + rect.Height));
         return this;
     }
 
-    public ICanvas DrawBG(RtF bounds, BGStyle style, BorderBoxStyle border)
+    public ICanvas DrawBG(rectf bounds, BGStyle style, BorderBoxStyle border)
     {
         if (border.HasRadius)
         {
@@ -37,7 +38,7 @@ public class DefaultCanvas : ICanvas
         return this;
     }
 
-    public ICanvas DrawBitmap(IImg  img, RtF rect, bool disabled = false)
+    public ICanvas DrawBitmap(IImg  img, rectf rect, bool disabled = false)
     {
         //p.DrawImage(img, rect.X, rect.Y);// disabled
         return this;
@@ -49,7 +50,7 @@ public class DefaultCanvas : ICanvas
         return this;
     }
 
-    public ICanvas DrawBorder(RtF bounds, BorderBoxStyle border)
+    public ICanvas DrawBorder(rectf bounds, BorderBoxStyle border)
     {
         //if (border.radius > 0)//尝试直接判断所有子radius数组,任意一个有大的就绘制边框? 但是绘制逻辑也要被拆分成4份.
         //{
@@ -107,7 +108,7 @@ public class DefaultCanvas : ICanvas
         return this;
     }
 
-    public ICanvas DrawFocusRect(RtF r, int inset = 0)
+    public ICanvas DrawFocusRect(rectf r, int inset = 0)
     {
         p.DrawRect(r.X, r.Y, r.Width, r.Height);
         return this;
@@ -140,7 +141,7 @@ public class DefaultCanvas : ICanvas
         return this;
     }
 
-    public ICanvas DrawRect(RtF r, uint color, int strokeWidth = 1)
+    public ICanvas DrawRect(rectf r, uint color, int strokeWidth = 1)
     {
         p.StrokeColor = color;
         p.StrokeWidth = strokeWidth;
@@ -171,7 +172,7 @@ public class DefaultCanvas : ICanvas
         return this;
     }
 
-    public ICanvas FillRect(RtF Rect, uint color)
+    public ICanvas FillRect(rectf Rect, uint color)
     {
         p.FillRect(Rect.Left, Rect.Top, Rect.Width, Rect.Height, color);
         return this;

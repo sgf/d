@@ -21,7 +21,7 @@
 		<Compile Remove="Converters\PointTypeConverter.cs" />
 		<Compile Remove="Converters\RectFTypeConverter.cs" />
 		<Compile Remove="Converters\RectTypeConverter.cs" />
-		<Compile Remove="Converters\SizeFTypeConverter.cs" />
+		<Compile Remove="Converters\sizefTypeConverter.cs" />
 		<Compile Remove="Converters\SizeTypeConverter.cs" />
 		<Compile Remove="ICanvas.保留.cs" />
 		<Compile Remove="IRender.cs" />
@@ -29,7 +29,7 @@
 		<Compile Remove="RectF.cs" />
 		<Compile Remove="rshapes.cs" />
 		<Compile Remove="Size.cs" />
-		<Compile Remove="SizeF.cs" />
+		<Compile Remove="sizef.cs" />
 	</ItemGroup>
 
 	<ItemGroup>

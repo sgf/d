@@ -9,11 +9,11 @@ namespace d2;
 
 // sk_irect_t
 [StructLayout (LayoutKind.Sequential)]
-public unsafe partial struct RtInt : IEquatable<RtInt>
+public unsafe partial struct recti : IEquatable<recti>
 {
-    public static readonly RtInt Empty;
+    public static readonly recti Empty;
 
-    public RtInt (int left, int top, int right, int bottom)
+    public recti (int left, int top, int right, int bottom)
     {
         this.left = left;
         this.right = right;
@@ -31,47 +31,47 @@ public unsafe partial struct RtInt : IEquatable<RtInt>
 
     public readonly bool IsEmpty => this == Empty;
 
-    public SzInt Size {
-        readonly get => new SzInt (Width, Height);
+    public sizei Size {
+        readonly get => new sizei (Width, Height);
         set {
             right = left + value.Width;
             bottom = top + value.Height;
         }
     }
 
-    public PtInt Location {
-        readonly get => new PtInt (left, top);
-        set => this = RtInt.Create (value, Size);
+    public pointi Location {
+        readonly get => new pointi (left, top);
+        set => this = recti.Create (value, Size);
     }
 
-    public readonly RtInt Standardized {
+    public readonly recti Standardized {
         get {
             if (left > right) {
                 if (top > bottom) {
-                    return new RtInt (right, bottom, left, top);
+                    return new recti (right, bottom, left, top);
                 } else {
-                    return new RtInt (right, top, left, bottom);
+                    return new recti (right, top, left, bottom);
                 }
             } else {
                 if (top > bottom) {
-                    return new RtInt (left, bottom, right, top);
+                    return new recti (left, bottom, right, top);
                 } else {
-                    return new RtInt (left, top, right, bottom);
+                    return new recti (left, top, right, bottom);
                 }
             }
         }
     }
 
-    public readonly RtInt AspectFit (SzInt size) =>
-        Floor (((RtF)this).AspectFit (size));
+    public readonly recti AspectFit (sizei size) =>
+        Floor (((rectf)this).AspectFit (size));
 
-    public readonly RtInt AspectFill (SzInt size) =>
-        Floor (((RtF)this).AspectFill (size));
+    public readonly recti AspectFill (sizei size) =>
+        Floor (((rectf)this).AspectFill (size));
 
-    public static RtInt Ceiling (RtF value) =>
+    public static recti Ceiling (rectf value) =>
         Ceiling (value, false);
 
-    public static RtInt Ceiling (RtF value, bool outwards)
+    public static recti Ceiling (rectf value, bool outwards)
     {
         int x, y, r, b;
         checked {
@@ -81,17 +81,17 @@ public unsafe partial struct RtInt : IEquatable<RtInt>
             b = (int)(outwards && value.Height < 0 ? Math.Floor (value.Bottom) : Math.Ceiling (value.Bottom));
         }
 
-        return new RtInt (x, y, r, b);
+        return new recti (x, y, r, b);
     }
 
-    public static RtInt Inflate (RtInt rect, int x, int y)
+    public static recti Inflate (recti rect, int x, int y)
     {
-        var r = new RtInt (rect.left, rect.top, rect.right, rect.bottom);
+        var r = new recti (rect.left, rect.top, rect.right, rect.bottom);
         r.Inflate (x, y);
         return r;
     }
 
-    public void Inflate (SzInt size) =>
+    public void Inflate (sizei size) =>
         Inflate (size.Width, size.Height);
 
     public void Inflate (int width, int height)
@@ -102,22 +102,22 @@ public unsafe partial struct RtInt : IEquatable<RtInt>
         bottom += height;
     }
 
-    public static RtInt Intersect (RtInt a, RtInt b)
+    public static recti Intersect (recti a, recti b)
     {
         if (!a.IntersectsWithInclusive (b))
             return Empty;
 
-        return new RtInt (
+        return new recti (
             Math.Max (a.left, b.left),
             Math.Max (a.top, b.top),
             Math.Min (a.right, b.right),
             Math.Min (a.bottom, b.bottom));
     }
 
-    public void Intersect (RtInt rect) =>
+    public void Intersect (recti rect) =>
         this = Intersect (this, rect);
 
-    public static RtInt Round (RtF value)
+    public static recti Round (rectf value)
     {
         int x, y, r, b;
         checked {
@@ -127,12 +127,12 @@ public unsafe partial struct RtInt : IEquatable<RtInt>
             b = (int)Math.Round (value.Bottom);
         }
 
-        return new RtInt (x, y, r, b);
+        return new recti (x, y, r, b);
     }
 
-    public static RtInt Floor (RtF value) => Floor (value, false);
+    public static recti Floor (rectf value) => Floor (value, false);
 
-    public static RtInt Floor (RtF value, bool inwards)
+    public static recti Floor (rectf value, bool inwards)
     {
         int x, y, r, b;
         checked {
@@ -142,10 +142,10 @@ public unsafe partial struct RtInt : IEquatable<RtInt>
             b = (int)(inwards && value.Height < 0 ? Math.Ceiling (value.Bottom) : Math.Floor (value.Bottom));
         }
 
-        return new RtInt (x, y, r, b);
+        return new recti (x, y, r, b);
     }
 
-    public static RtInt Truncate (RtF value)
+    public static recti Truncate (rectf value)
     {
         int x, y, r, b;
         checked {
@@ -155,33 +155,33 @@ public unsafe partial struct RtInt : IEquatable<RtInt>
             b = (int)value.Bottom;
         }
 
-        return new RtInt (x, y, r, b);
+        return new recti (x, y, r, b);
     }
 
-    public static RtInt Union (RtInt a, RtInt b) =>
-        new RtInt (
+    public static recti Union (recti a, recti b) =>
+        new recti (
             Math.Min (a.Left, b.Left),
             Math.Min (a.Top, b.Top),
             Math.Max (a.Right, b.Right),
             Math.Max (a.Bottom, b.Bottom));
 
-    public void Union (RtInt rect) =>
+    public void Union (recti rect) =>
         this = Union (this, rect);
 
     public readonly bool Contains (int x, int y) =>
         (x >= left) && (x < right) && (y >= top) && (y < bottom);
 
-    public readonly bool Contains (PtInt pt) =>
+    public readonly bool Contains (pointi pt) =>
         Contains (pt.X, pt.Y);
 
-    public readonly bool Contains (RtInt rect) =>
+    public readonly bool Contains (recti rect) =>
         (left <= rect.left) && (right >= rect.right) &&
         (top <= rect.top) && (bottom >= rect.bottom);
 
-    public readonly bool IntersectsWith (RtInt rect) =>
+    public readonly bool IntersectsWith (recti rect) =>
         (left < rect.right) && (right > rect.left) && (top < rect.bottom) && (bottom > rect.top);
 
-    public readonly bool IntersectsWithInclusive (RtInt rect) =>
+    public readonly bool IntersectsWithInclusive (recti rect) =>
         (left <= rect.right) && (right >= rect.left) && (top <= rect.bottom) && (bottom >= rect.top);
 
     public void Offset (int x, int y)
@@ -192,22 +192,22 @@ public unsafe partial struct RtInt : IEquatable<RtInt>
         bottom += y;
     }
 
-    public void Offset (PtInt pos) => Offset (pos.X, pos.Y);
+    public void Offset (pointi pos) => Offset (pos.X, pos.Y);
 
     public readonly override string ToString () =>
         $"{{Left={Left},Top={Top},Width={Width},Height={Height}}}";
 
-    public static RtInt Create (SzInt size) =>
-        Create (PtInt.Empty.X, PtInt.Empty.Y, size.Width, size.Height);
+    public static recti Create (sizei size) =>
+        Create (pointi.Empty.X, pointi.Empty.Y, size.Width, size.Height);
 
-    public static RtInt Create (PtInt location, SzInt size) =>
+    public static recti Create (pointi location, sizei size) =>
         Create (location.X, location.Y, size.Width, size.Height);
 
-    public static RtInt Create (int width, int height) =>
-        new RtInt (PtInt.Empty.X, PtInt.Empty.X, width, height);
+    public static recti Create (int width, int height) =>
+        new recti (pointi.Empty.X, pointi.Empty.X, width, height);
 
-    public static RtInt Create (int x, int y, int width, int height) =>
-        new RtInt (x, y, x + width, y + height);
+    public static recti Create (int x, int y, int width, int height) =>
+        new recti (x, y, x + width, y + height);
 
 
     // public int32_t left
@@ -238,16 +238,16 @@ public unsafe partial struct RtInt : IEquatable<RtInt>
         set => bottom = value;
     }
 
-    public readonly bool Equals (RtInt obj) =>
+    public readonly bool Equals (recti obj) =>
         left == obj.left && top == obj.top && right == obj.right && bottom == obj.bottom;
 
     public readonly override bool Equals (object obj) =>
-        obj is RtInt f && Equals (f);
+        obj is recti f && Equals (f);
 
-    public static bool operator == (RtInt left, RtInt right) =>
+    public static bool operator == (recti left, recti right) =>
         left.Equals (right);
 
-    public static bool operator != (RtInt left, RtInt right) =>
+    public static bool operator != (recti left, recti right) =>
         !left.Equals (right);
 
     public readonly override int GetHashCode ()
